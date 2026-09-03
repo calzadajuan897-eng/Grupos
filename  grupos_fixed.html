@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#121212">
+  <meta name="color-scheme" content="dark">
+  <title>FB Manager - Material</title>
+  <style>
+    :root { 
+      --bg: #121212; 
+      --surface: #1E1E1E; 
+      --surface-variant: #2D2D2D;
+      --primary: #8AB4F8;
+      --secondary: #81C995;
+      --error: #F28B82;
+      --text: #E8EAED; 
+      --text-muted: #9AA0A6; 
+      --border: #3C4043; 
+    }
+    
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+      background-color: var(--bg); 
+      color: var(--text); 
+      margin: 0; 
+      padding: 38px 14px 80px 14px; 
+    }
+
+    .brand { 
+      text-align: center; 
+      margin: 0 0 4px; 
+      font-size: 1.2rem; 
+      font-weight: 500; 
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+    
+    .stats { text-align: center; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.5px; margin-bottom: 16px; }
+    
+    .panel, .cuenta-card { 
+      background: var(--surface); 
+      border-radius: 16px; 
+      padding: 12px; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+      margin-bottom: 16px; 
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .cuenta-card { padding: 0; overflow: hidden; }
+    
+    .input-row { display: flex; gap: 8px; }
+    input[type="text"] { 
+      flex: 1; 
+      padding: 12px 14px; 
+      background: var(--bg); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      color: var(--text); 
+      font-size: 0.85rem; 
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus { 
+      border-color: var(--primary); 
+      box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.2);
+    }
+    
+    button { 
+      border: none; 
+      border-radius: 20px; 
+      cursor: pointer; 
+      font-weight: 500; 
+      font-size: 0.75rem; 
+      letter-spacing: 0.5px;
+      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s, background-color 0.2s; 
+      text-transform: uppercase;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button:active { transform: scale(0.92); filter: brightness(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    
+    .btn-add { background: var(--primary); color: #000; padding: 10px 16px; }
+    .btn-target { background: var(--error); color: #000; padding: 10px 16px; }
+    .btn-shuffle { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 9px 12px; box-shadow: none; }
+    .btn-action { background: var(--surface-variant); color: var(--text); padding: 9px 12px; box-shadow: none; }
+    .actions-grid { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+    
+    .msg { padding: 10px 14px; border-radius: 12px; font-size: 0.75rem; margin-top: 10px; display: none; font-weight: 500; }
+    .msg-error { background: rgba(242,139,130,0.15); color: var(--error); }
+    .msg-ok { background: rgba(129,201,149,0.15); color: var(--secondary); }
+    
+    .cuenta-header { 
+      background: var(--surface); 
+      padding: 12px 16px; 
+      font-weight: 500; 
+      display: flex; 
+      justify-content: space-between; 
+      border-bottom: 1px solid var(--border); 
+      font-size: 0.9rem; 
+    }
+    .cuenta-title { color: var(--text); }
+    .badge { background: var(--bg); color: var(--text-muted); padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid var(--border); }
+    .badge.full { background: rgba(129,201,149,0.15); color: var(--secondary); border-color: rgba(129,201,149,0.3); }
+    
+    .link-list { list-style: none; margin: 0; padding: 0; }
+    .link-item { padding: 12px 16px; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); gap: 8px; transition: background 0.2s ease; }
+    .link-item:last-child { border-bottom: none; }
+    
+    .link-item.status-good { border-left: 4px solid var(--secondary); }
+    .link-item.status-bad { border-left: 4px solid var(--error); }
+    .link-item.status-bad .link-anchor { text-decoration: line-through; opacity: 0.5; }
+    
+    .link-item.is-current { 
+      background: rgba(138, 180, 248, 0.08) !important; 
+      border: 1px solid var(--primary) !important; 
+      border-radius: 8px; 
+      margin: 4px; 
+    }
+    
+    .tag-current { background: var(--primary); color: #000; font-size: 0.65rem; font-weight: 500; padding: 2px 6px; border-radius: 8px; margin-left: 8px; }
+    .link-main { display: flex; align-items: center; gap: 8px; }
+    .link-num { color: var(--text-muted); font-size: 0.75rem; min-width: 22px; font-weight: 500; }
+    .link-anchor { color: var(--primary); text-decoration: none; word-break: break-all; font-size: 0.85rem; flex: 1; cursor: pointer; }
+    
+    .item-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-left: 30px; }
+    .btn-pill { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.7rem; box-shadow: none; font-weight: 400; text-transform: none; }
+    .btn-pill.active-good { background: rgba(129,201,149,0.15); border-color: transparent; color: var(--secondary); font-weight: 500; }
+    .btn-pill.active-bad { background: rgba(242,139,130,0.15); border-color: transparent; color: var(--error); font-weight: 500; }
+    .btn-pill.active-now { background: var(--primary); color: #000; border-color: transparent; font-weight: 500; }
+    .btn-del { color: var(--text-muted); }
+    
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); padding: 20px; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-box { background: var(--surface); border-radius: 24px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
+    .modal-box h3 { margin: 0 0 8px; font-size: 1.1rem; font-weight: 500; }
+    
+    textarea { width: 100%; height: 160px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: 0.75rem; padding: 12px; border-radius: 12px; margin-top: 8px; outline: none; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <div class="brand">Groups Manager</div>
+  <div class="stats" id="stats">Cargando...</div>
+
+  <div class="panel">
+    <div class="input-row">
+      <input type="text" id="urlInput" placeholder="Pega el enlace del grupo...">
+      <button class="btn-add" onclick="agregarGrupo()">Añadir</button>
+    </div>
+    <div id="statusMsg" class="msg"></div>
+    <div class="actions-grid">
+      <button class="btn-target" onclick="irAlActual()">Ir al Actual</button>
+      <button class="btn-shuffle" onclick="aleatorizarGrupos()">Aleatorizar</button>
+      <button class="btn-action" onclick="compartirJSON()">Compartir</button>
+      <button class="btn-action" onclick="exportarJSON()">Guardar</button>
+      <button class="btn-action" onclick="document.getElementById('fileInput').click()">Cargar</button>
+      <button class="btn-action" onclick="abrirModalRespaldo()">Texto</button>
+      <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importarJSON(event)">
+    </div>
+  </div>
+
+  <div id="cuentasContainer"></div>
+
+  <!-- Modales -->
+  <div id="modalConfirmar" class="modal">
+    <div class="modal-box" style="text-align:center;">
+      <h3 style="color:var(--error);">Eliminar Grupo</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Esta acción no se puede deshacer.</p>
+      <div style="display:flex; justify-content:center; gap:12px;">
+        <button class="btn-action" style="padding: 10px 20px;" onclick="cerrarModalConfirmar()">Cancelar</button>
+        <button class="btn-add" style="background:var(--error); color:#000; padding: 10px 20px;" onclick="ejecutarEliminacion()">Borrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalReemplazar" class="modal">
+    <div class="modal-box">
+      <h3 style="color:var(--primary);">Reemplazar Grupo</h3>
+      <input type="text" id="inputNuevoLink" style="width:100%; margin-bottom:16px; margin-top: 8px;">
+      <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn-action" onclick="cerrarModalReemplazar()">Cancelar</button>
+        <button class="btn-add" onclick="ejecutarReemplazo()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalTexto" class="modal">
+    <div class="modal-box">
+      <h3 style="color:var(--primary);">Respaldo en Texto</h3>
+      <textarea id="textoRespaldo"></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:16px;">
+        <button class="btn-action" onclick="cerrarModalRespaldo()">Cerrar</button>
+        <button class="btn-add" onclick="restaurarDesdeTexto()">Restaurar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="cordova.js"></script>
+
+  <script>
+    const BASE_IDS = "438171569902353,429183315211314,1080698523781889,714748772845649,957953845058103,1070984073801394,448395568060890,1116520240263022,358496966978510,490443111645873,1302521647932520,800734915412662,1815870522215076,6513555805423038,931186098548624,3044350469209845,345830398110536,1532479067532552,1390144204812962,609178122061547,1412192819733757,1616325305894911,1569216660328897,219322814540844,911463104082481,1401104127185790,5308257605946307,2583344215340968,1542882509289069,753765555396869,1493340817811348,1701758420588183,902432563143960,144586936249024,1235235007586423,429560850851190,295534044307525,MivecindarioSoli,413939685121517,652422591081824,1216378599534945,1100368973816872,615327828005040,291565812880208,1193080044999546,1536462020281255,794946552128798,225332919497424,2937421596395748,1561184694691438,425651670964174,3256463614608245,850178156583059,1075826037039245,7057940034228375,843028816476049,1682170875963401,1392758124472586,383216321171622,1500430664069532,noticiasenlared,1342751849171093,1222403881535742,1705494723177536,389539717833884,1477311865627867,xoxocotlanalmomento,922483068305499,489879503565097,2569654126711832,422511960302107,882728343207524,1711524799779550,1027936071163200,1346017546233623,507537255979207,3076073446004896,1406508609499934,546396094759732,933856628296848,492514353446633,838367235657603,699977938870121,27186580874320628,205256595306690,877195642627760,1468482944017505,490731065990997,755860180566942,684982147171021,1010328331080113,1243942062634528,360076305267115,558062305621931,364126089933334,6881038568589319,1855019244939671,1161962198828852,1981069132302854,1737541660497952,1090827378337761,chimalhuacanysusalrededores,1058566435363628,996321322422496,3333241840313313,153026194523067,227211687121536,1519061738824781,1801476697035311,781250719633870,596932698546192,739519314839022,396191449728348,1799627310187301,1246879716297958,1033010850135927,361168816749519,2299627820223408,1587262891681542,982318366051280,610877930251028,320843501042405,1066694821137990,701419618513299,1317395505128875,1726652184748029,1220733422699843,1764008867324375,1252953893004532,3692523054364331,983430872917235,1596587897272318,1175458834178155,2231653213710451,993612035155649,420105186633067,2630669420480855,3527405530814778,1468104167136898,306754654914623,231743015323077,548949881001003,235384341281905,737887767495190,tijuanayalgomas,1705131363033115,762225935288067,7005052516225743,936199187190918,223422642593183,1201733367392698,bugaventas,570509089979856,3654187134857239,3668336143297308,1659536087704177,1074180987606282,221917823723934,891487698570794,705757149599322,799073043930379,885458013579302,584808788393451,488987258841602"; 
+
+    function vibrar(patron = 20) { if (navigator.vibrate) { try { navigator.vibrate(patron); } catch(e) {} } }
+
+    document.addEventListener('deviceready', () => {
+      if (window.StatusBar) { 
+        StatusBar.overlaysWebView(false);
+        StatusBar.backgroundColorByHexString('#121212'); 
+        StatusBar.styleLightContent(); 
+      }
+    }, false);
+
+    let rawStorage = localStorage.getItem('cyber_fb_list');
+    let grupos = [];
+    if (rawStorage) {
+      try { let p = JSON.parse(rawStorage); grupos = p.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); } catch(e) { grupos = []; }
+    }
+    if (!grupos.length) { grupos = BASE_IDS.split(',').map(id => ({ url: 'https://facebook.com/groups/' + id + '/', status: 'none' })); }
+
+    let urlActual = localStorage.getItem('cyber_fb_current_url') || '';
+    let idOperacion = null;
+
+    function limpiarID(url) { return (url || '').replace(/[\u200e\u200f\s]/g, '').replace(/^https?:\/\/(www\.|m\.)?facebook\.com\/groups\//i, '').split('/')[0].split('?')[0].toLowerCase(); }
+    function mostrarMensaje(texto, tipo) { const msg = document.getElementById('statusMsg'); msg.textContent = texto; msg.className = `msg msg-${tipo}`; msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 4000); }
+    function marcarActual(url) { vibrar(20); urlActual = url; localStorage.setItem('cyber_fb_current_url', url); render(); }
+    function irAlActual() {
+      vibrar(35); if (!urlActual) return mostrarMensaje('Sin grupo actual', 'error');
+      const el = document.querySelector('.is-current');
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); mostrarMensaje('Enfocando...', 'ok'); } else { mostrarMensaje('No encontrado en la lista', 'error'); }
+    }
+
+    function abrirEnFB(url) {
+      marcarActual(url); vibrar(30);
+      if (window.cordova && window.cordova.InAppBrowser) { cordova.InAppBrowser.open(url, '_system'); } 
+      else { const clean = url.replace(/^https?:\/\//i, ''); window.location.href = `intent://${clean}#Intent;scheme=https;package=com.facebook.lite;end`; }
+    }
+
+    function render() {
+      localStorage.setItem('cyber_fb_list', JSON.stringify(grupos));
+      const container = document.getElementById('cuentasContainer'); container.innerHTML = '';
+      const total = grupos.length; const totalCuentas = Math.ceil(total / 25) || 1;
+      document.getElementById('stats').textContent = `Total: ${total} grupos • Cuentas: ${totalCuentas}`;
+
+      let cuentaIndex = 1;
+      for (let i = 0; i < total; i += 25) {
+        const chunk = grupos.slice(i, i + 25);
+        const card = document.createElement('div'); card.className = 'cuenta-card';
+        card.innerHTML = `<div class="cuenta-header"><span class="cuenta-title">Cuenta ${cuentaIndex}</span><span class="badge ${chunk.length === 25 ? 'full' : ''}">${chunk.length}/25</span></div>`;
+        const ul = document.createElement('ul'); ul.className = 'link-list';
+
+        chunk.forEach((item, localIdx) => {
+          const globalIdx = i + localIdx;
+          const li = document.createElement('li');
+          const isCurr = item.url === urlActual;
+          const st = item.status === 'good' ? 'status-good' : (item.status === 'bad' ? 'status-bad' : '');
+          li.className = `link-item ${st} ${isCurr ? 'is-current' : ''}`;
+          li.innerHTML = `
+            <div class="link-main"><span class="link-num">${localIdx + 1}.</span><span class="link-anchor" onclick="abrirEnFB('${item.url}')">${item.url}</span>${isCurr ? '<span class="tag-current">ACTUAL</span>' : ''}</div>
+            <div class="item-toolbar">
+              <button class="btn-pill ${isCurr ? 'active-now' : ''}" onclick="marcarActual('${item.url}')">Fijar</button>
+              <button class="btn-pill ${item.status === 'good' ? 'active-good' : ''}" onclick="toggleCalificacion(${globalIdx}, 'good')">Bien</button>
+              <button class="btn-pill ${item.status === 'bad' ? 'active-bad' : ''}" onclick="toggleCalificacion(${globalIdx}, 'bad')">Mal</button>
+              <button class="btn-pill" onclick="abrirModalReemplazar(${globalIdx})">Cambiar</button>
+              <button class="btn-pill btn-del" onclick="abrirModalConfirmar(${globalIdx})">✕</button>
+            </div>
+          `;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul); container.appendChild(card); cuentaIndex++;
+      }
+    }
+
+    function toggleCalificacion(idx, estado) { vibrar(estado === 'good' ? [15, 30, 15] : 40); grupos[idx].status = grupos[idx].status === estado ? 'none' : estado; render(); }
+    function aleatorizarGrupos() {
+      vibrar([25, 40, 25, 40, 30]); if (grupos.length <= 1) return;
+      for (let i = grupos.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [grupos[i], grupos[j]] = [grupos[j], grupos[i]]; }
+      render(); mostrarMensaje('Grupos aleatorizados', 'ok');
+    }
+
+    function agregarGrupo() {
+      const input = document.getElementById('urlInput'); let raw = input.value.trim().replace(/[\u200e\u200f]/g, ''); if (!raw) return;
+      if (!raw.startsWith('http')) raw = 'https://facebook.com/groups/' + raw.replace(/^\/+/, '');
+      const idNuevo = limpiarID(raw);
+      if (!idNuevo) { vibrar([50, 40, 50]); return mostrarMensaje('Enlace no válido', 'error'); }
+      for (let i = 0; i < grupos.length; i++) { if (limpiarID(grupos[i].url) === idNuevo) { vibrar([60, 50, 60]); return mostrarMensaje(`Grupo repetido`, 'error'); } }
+      vibrar(25); grupos.push({ url: raw, status: 'none' }); input.value = ''; mostrarMensaje('Añadido', 'ok'); render();
+    }
+
+    function abrirModalConfirmar(idx) { vibrar(30); idOperacion = idx; document.getElementById('modalConfirmar').style.display = 'flex'; }
+    function cerrarModalConfirmar() { document.getElementById('modalConfirmar').style.display = 'none'; idOperacion = null; }
+    function ejecutarEliminacion() { vibrar(50); if (idOperacion !== null) { if (grupos[idOperacion].url === urlActual) { urlActual = ''; localStorage.removeItem('cyber_fb_current_url'); } grupos.splice(idOperacion, 1); cerrarModalConfirmar(); render(); mostrarMensaje('Eliminado', 'ok'); } }
+
+    function abrirModalReemplazar(idx) { vibrar(20); idOperacion = idx; document.getElementById('inputNuevoLink').value = grupos[idx].url; document.getElementById('modalReemplazar').style.display = 'flex'; }
+    function cerrarModalReemplazar() { document.getElementById('modalReemplazar').style.display = 'none'; idOperacion = null; }
+    function ejecutarReemplazo() {
+      const nuevo = document.getElementById('inputNuevoLink').value.trim().replace(/[\u200e\u200f]/g, ''); if (!nuevo || idOperacion === null) return;
+      let link = nuevo.startsWith('http') ? nuevo : 'https://facebook.com/groups/' + nuevo.replace(/^\/+/, '');
+      vibrar(25); if (grupos[idOperacion].url === urlActual) { urlActual = link; localStorage.setItem('cyber_fb_current_url', link); }
+      grupos[idOperacion] = { url: link, status: 'none' }; cerrarModalReemplazar(); render(); mostrarMensaje('Reemplazado', 'ok');
+    }
+        /* SISTEMA DE COMPARTIR NATIVO */
+    async function compartirJSON() {
+      vibrar(30); const jsonStr = JSON.stringify(grupos, null, 2);
+      if (window.plugins && window.plugins.socialsharing) {
+        const base64Data = "data:application/json;base64," + btoa(unescape(encodeURIComponent(jsonStr)));
+        window.plugins.socialsharing.share(null, 'cyber_grupos.json', base64Data, null);
+      } else { mostrarMensaje('Plugin no detectado', 'error'); }
+    }
+
+    /* SISTEMA DE ESCRITURA FÍSICA DIRECTA EN CARPETA DESCARGAS */
+    function exportarJSON() {
+      vibrar(25);
+      const jsonStr = JSON.stringify(grupos, null, 2);
+
+      if (window.cordova && cordova.plugins && cordova.plugins.permissions) {
+        var permissions = cordova.plugins.permissions;
+        permissions.checkPermission(permissions.WRITE_EXTERNAL_STORAGE, function(status) {
+          if (status.hasPermission) {
+            escribirEnMemoria(jsonStr);
+          } else {
+            mostrarMensaje('Solicitando permiso...', 'ok');
+            permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, function(statusReq) {
+              if (statusReq.hasPermission) { escribirEnMemoria(jsonStr); } else { mostrarMensaje('Permiso denegado', 'error'); }
+            }, function() { mostrarMensaje('Error de permisos', 'error'); });
+          }
+        });
+      } else {
+        const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr); a.download = "cyber_grupos.json"; document.body.appendChild(a); a.click(); a.remove();
+      }
+    }
+
+    function escribirEnMemoria(texto) {
+      mostrarMensaje('Creando archivo...', 'ok');
+      window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory + 'Download/', function(dir) {
+        dir.getFile("cyber_grupos.json", {create: true, exclusive: false}, function(fileEntry) {
+          fileEntry.createWriter(function(fileWriter) {
+            fileWriter.onwriteend = function() { mostrarMensaje('Guardado en Descargas', 'ok'); vibrar([30,50,30]); };
+            fileWriter.onerror = function() { mostrarMensaje('Error al escribir', 'error'); };
+            fileWriter.write(new Blob([texto], {type: 'application/json'}));
+          }, function(){ mostrarMensaje('Error en writer', 'error'); });
+        }, function(){ mostrarMensaje('Error al crear archivo', 'error'); });
+      }, function(){ mostrarMensaje('Error al abrir Descargas', 'error'); });
+    }
+
+    function importarJSON(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader(); r.onload = ev => {
+        try { const res = JSON.parse(ev.target.result); if (Array.isArray(res)) { vibrar([20, 30, 20]); grupos = res.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); render(); mostrarMensaje('Base de datos cargada', 'ok'); } } catch(err) { mostrarMensaje('Archivo no válido', 'error'); }
+      }; r.readAsText(f);
+    }
+    
+    function abrirModalRespaldo() { vibrar(20); document.getElementById('textoRespaldo').value = JSON.stringify(grupos); document.getElementById('modalTexto').style.display = 'flex'; }
+    function cerrarModalRespaldo() { document.getElementById('modalTexto').style.display = 'none'; }
+    function restaurarDesdeTexto() {
+      try { const val = JSON.parse(document.getElementById('textoRespaldo').value.trim()); if (Array.isArray(val)) { vibrar([20, 30, 20]); grupos = val.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); render(); cerrarModalRespaldo(); mostrarMensaje('Restaurado', 'ok'); } } catch(e) { alert('Error: Formato incorrecto.'); }
+    }
+
+    render();
+  </script>
+</body>
+</html>
