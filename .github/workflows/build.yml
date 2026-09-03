@@ -30,24 +30,29 @@ jobs:
           cordova create app com.cyber.fbmanager "Grupos FB"
           cd app
           rm -rf www/*
-          cp ../grupos.html www/grupos.html
+          
+          # Aqui le decimos que tome el archivo con el (1) y lo convierta en index.html
+          cp "../grupos (1).html" www/index.html
           
           if [ -f ../icon.png ]; then
             cp ../icon.png icon.png
           fi
 
-          # Plugins nativos para barra de estado y apertura de enlaces
+          # Plugins nativos (Archivos, Permisos, Compartir, Interfaz)
           cordova plugin add cordova-plugin-statusbar
           cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-x-socialsharing
+          cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-android-permissions
 
-          # Inyeccion de configuracion y permisos de Android
+          # Configuracion de Android
           cat << 'EOF' > config.xml
           <?xml version='1.0' encoding='utf-8'?>
           <widget id="com.cyber.fbmanager" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
               <name>Grupos FB</name>
               <description>Cyber FB Manager Pro</description>
               <author email="dev@cyberfb.local">CyberFB</author>
-              <content src="grupos.html" />
+              <content src="index.html" />
               <access origin="*" />
               <allow-intent href="http://*/*" />
               <allow-intent href="https://*/*" />
@@ -57,6 +62,7 @@ jobs:
               <preference name="StatusBarBackgroundColor" value="#05070a" />
               <preference name="StatusBarStyle" value="lightcontent" />
               <preference name="BackgroundColor" value="#05070a" />
+              <preference name="AndroidPersistentFileLocation" value="Compatibility" />
               
               <icon src="icon.png" />
           </widget>
