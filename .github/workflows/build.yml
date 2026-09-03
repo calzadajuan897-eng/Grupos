@@ -32,7 +32,7 @@ jobs:
           rm -rf www/*
           
           # Aqui le decimos que tome el archivo con el (1) y lo convierta en index.html
-          cp "../grupos_final.html" www/index.html
+          cp "../grupos_material.html" www/index.html
           
           if [ -f ../icon.png ]; then
             cp ../icon.png icon.png
