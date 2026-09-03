@@ -30,7 +30,7 @@ jobs:
           cordova create app com.cyber.fbmanager CyberFB
           cd app
           rm -rf www/*
-          cp ../index.html www/index.html
+          cp ../grupos.html www/grupos.html
           cordova platform add android
           cordova build android --debug
 
