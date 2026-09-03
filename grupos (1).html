@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#05070a">
+  <meta name="color-scheme" content="dark">
+  <title>CYBER-FB // MANAGER</title>
+  <style>
+    :root { --bg: #05070a; --card: #0c111a; --cyan: #00f0ff; --cyan-glow: rgba(0, 240, 255, 0.2); --green: #00ffa3; --green-glow: rgba(0, 255, 163, 0.15); --red: #ff2a5f; --red-glow: rgba(255, 42, 95, 0.4); --text: #cbd5e1; --muted: #566579; --border: #162030; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 70px; }
+    .brand { text-align: center; margin: 6px 0 2px; letter-spacing: 2px; font-size: 1.15rem; font-weight: 900; background: linear-gradient(90deg, var(--cyan), #7000ff, var(--red)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stats { text-align: center; color: var(--muted); font-size: 0.72rem; letter-spacing: 1px; margin-bottom: 10px; }
+    .panel { background: var(--card); border-radius: 8px; padding: 10px; border: 1px solid var(--border); box-shadow: 0 0 12px var(--cyan-glow); margin-bottom: 14px; }
+    .input-row { display: flex; gap: 6px; }
+    input[type="text"] { flex: 1; padding: 9px 10px; background: #020305; border: 1px solid var(--border); border-radius: 6px; color: var(--cyan); font-size: 0.8rem; outline: none; }
+    input[type="text"]:focus { border-color: var(--cyan); }
+    
+    /* ANIMACIÓN FÍSICA DE LOS BOTONES */
+    button { border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.75rem; transition: transform 0.1s ease, filter 0.2s; }
+    button:active { transform: scale(0.92); filter: brightness(1.2); }
+    
+    .btn-add { background: var(--cyan); color: #000; padding: 9px 12px; }
+    .btn-target { background: linear-gradient(135deg, #ff2a5f, #7928ca); color: #fff; padding: 8px 12px; box-shadow: 0 0 8px var(--red-glow); }
+    .btn-shuffle { background: #1f293d; color: var(--cyan); border: 1px solid var(--cyan); padding: 8px 10px; }
+    .btn-action { background: #101622; color: #94a3b8; border: 1px solid var(--border); padding: 7px 10px; }
+    .actions-grid { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+    .msg { padding: 8px 10px; border-radius: 6px; font-size: 0.75rem; margin-top: 8px; display: none; }
+    .msg-error { background: rgba(255,42,95,0.15); border: 1px solid var(--red); color: #ff85a1; }
+    .msg-ok { background: var(--green-glow); border: 1px solid var(--green); color: #85ffd1; }
+    .cuenta-card { background: var(--card); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; overflow: hidden; }
+    .cuenta-header { background: #0f1624; padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .cuenta-title { color: var(--cyan); letter-spacing: 1px; }
+    .badge { background: #192231; color: var(--muted); padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; }
+    .badge.full { background: var(--green-glow); color: var(--green); border: 1px solid var(--green); }
+    .link-list { list-style: none; margin: 0; padding: 0; }
+    .link-item { padding: 9px 10px; display: flex; flex-direction: column; border-bottom: 1px solid #121824; gap: 6px; transition: background 0.25s ease; }
+    .link-item:last-child { border-bottom: none; }
+    .link-item.status-good { background: rgba(0, 255, 163, 0.04); border-left: 3px solid var(--green); }
+    .link-item.status-bad { background: rgba(255, 42, 95, 0.03); border-left: 3px solid #6b1426; }
+    .link-item.status-bad .link-anchor { text-decoration: line-through; opacity: 0.45; }
+    .link-item.is-current { background: rgba(255, 42, 95, 0.12) !important; border: 1px solid var(--red) !important; box-shadow: 0 0 14px var(--red-glow), inset 0 0 8px rgba(255, 42, 95, 0.15) !important; border-radius: 6px; margin: 3px 2px; animation: pulse-border 2.5s infinite alternate; }
+    @keyframes pulse-border { 0% { box-shadow: 0 0 8px var(--red-glow); } 100% { box-shadow: 0 0 18px rgba(255, 42, 95, 0.65); } }
+    .tag-current { background: var(--red); color: #fff; font-size: 0.65rem; font-weight: 900; padding: 1px 5px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.5px; }
+    .link-main { display: flex; align-items: center; gap: 6px; }
+    .link-num { color: var(--muted); font-size: 0.72rem; min-width: 20px; }
+    .link-anchor { color: #93c5fd; text-decoration: none; word-break: break-all; font-size: 0.78rem; flex: 1; cursor: pointer; }
+    .item-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-left: 26px; }
+    .btn-pill { background: #0d131f; border: 1px solid #1a2436; color: #7d8ea5; padding: 3px 6px; border-radius: 4px; font-size: 0.68rem; }
+    .btn-pill.active-good { background: var(--green-glow); border-color: var(--green); color: var(--green); }
+    .btn-pill.active-bad { background: rgba(255,42,95,0.1); border-color: #6b1426; color: #ff85a1; }
+    .btn-pill.active-now { background: var(--red); color: #fff; border-color: var(--red); }
+    .btn-del { color: #e2e8f0; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); padding: 16px; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-box { background: var(--card); border-radius: 8px; padding: 14px; width: 100%; max-width: 440px; border: 1px solid var(--cyan); box-shadow: 0 0 20px var(--cyan-glow); }
+    textarea { width: 100%; height: 180px; background: #030406; border: 1px solid var(--border); color: var(--green); font-size: 0.7rem; padding: 8px; border-radius: 6px; margin-top: 6px; outline: none; }
+  </style>
+</head>
+<body>
+
+  <div class="brand">CYBER-FB // MANAGER</div>
+  <div class="stats" id="stats">INICIALIZANDO...</div>
+
+  <div class="panel">
+    <div class="input-row">
+      <input type="text" id="urlInput" placeholder="Pega el link del grupo...">
+      <button class="btn-add" onclick="agregarGrupo()">AÑADIR</button>
+    </div>
+    <div id="statusMsg" class="msg"></div>
+    <div class="actions-grid">
+      <button class="btn-target" onclick="irAlActual()">🎯 IR AL ACTUAL</button>
+      <button class="btn-shuffle" onclick="aleatorizarGrupos()">🔀 ALEATORIZAR</button>
+      <button class="btn-action" onclick="compartirJSON()">📤 COMPARTIR</button>
+      <button class="btn-action" onclick="exportarJSON()">💾 GUARDAR</button>
+      <button class="btn-action" onclick="document.getElementById('fileInput').click()">📂 CARGAR</button>
+      <button class="btn-action" onclick="abrirModalRespaldo()">📋 TEXTO</button>
+      <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importarJSON(event)">
+    </div>
+  </div>
+
+  <div id="cuentasContainer"></div>
+
+  <!-- Modales -->
+  <div id="modalConfirmar" class="modal">
+    <div class="modal-box" style="border-color:var(--red); text-align:center;">
+      <h3 style="color:var(--red); margin:0 0 8px; font-size:0.95rem;">⚠️ ¿ESTÁS SEGURO?</h3>
+      <div style="display:flex; justify-content:center; gap:8px;">
+        <button class="btn-action" onclick="cerrarModalConfirmar()">CANCELAR</button>
+        <button class="btn-add" style="background:var(--red); color:#fff;" onclick="ejecutarEliminacion()">BORRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalReemplazar" class="modal">
+    <div class="modal-box">
+      <h3 style="color:var(--cyan); margin:0 0 6px; font-size:0.9rem;">🔄 REEMPLAZAR GRUPO</h3>
+      <input type="text" id="inputNuevoLink" style="width:100%; margin-bottom:10px;">
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn-action" onclick="cerrarModalReemplazar()">CANCELAR</button>
+        <button class="btn-add" onclick="ejecutarReemplazo()">GUARDAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalTexto" class="modal">
+    <div class="modal-box">
+      <h3 style="color:var(--cyan); margin:0; font-size:0.9rem;">RESPALDO EN TEXTO</h3>
+      <textarea id="textoRespaldo"></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button class="btn-action" onclick="cerrarModalRespaldo()">CERRAR</button>
+        <button class="btn-add" onclick="restaurarDesdeTexto()">RESTAURAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BASE_IDS = "438171569902353,429183315211314,1080698523781889,714748772845649,957953845058103,1070984073801394,448395568060890,1116520240263022,358496966978510,490443111645873,1302521647932520,800734915412662,1815870522215076,6513555805423038,931186098548624,3044350469209845,345830398110536,1532479067532552,1390144204812962,609178122061547,1412192819733757,1616325305894911,1569216660328897,219322814540844,911463104082481,1401104127185790,5308257605946307,2583344215340968,1542882509289069,753765555396869,1493340817811348,1701758420588183,902432563143960,144586936249024,1235235007586423,429560850851190,295534044307525,MivecindarioSoli,413939685121517,652422591081824,1216378599534945,1100368973816872,615327828005040,291565812880208,1193080044999546,1536462020281255,794946552128798,225332919497424,2937421596395748,1561184694691438,425651670964174,3256463614608245,850178156583059,1075826037039245,7057940034228375,843028816476049,1682170875963401,1392758124472586,383216321171622,1500430664069532,noticiasenlared,1342751849171093,1222403881535742,1705494723177536,389539717833884,1477311865627867,xoxocotlanalmomento,922483068305499,489879503565097,2569654126711832,422511960302107,882728343207524,1711524799779550,1027936071163200,1346017546233623,507537255979207,3076073446004896,1406508609499934,546396094759732,933856628296848,492514353446633,838367235657603,699977938870121,27186580874320628,205256595306690,877195642627760,1468482944017505,490731065990997,755860180566942,684982147171021,1010328331080113,1243942062634528,360076305267115,558062305621931,364126089933334,6881038568589319,1855019244939671,1161962198828852,1981069132302854,1737541660497952,1090827378337761,chimalhuacanysusalrededores,1058566435363628,996321322422496,3333241840313313,153026194523067,227211687121536,1519061738824781,1801476697035311,781250719633870,596932698546192,739519314839022,396191449728348,1799627310187301,1246879716297958,1033010850135927,361168816749519,2299627820223408,1587262891681542,982318366051280,610877930251028,320843501042405,1066694821137990,701419618513299,1317395505128875,1726652184748029,1220733422699843,1764008867324375,1252953893004532,3692523054364331,983430872917235,1596587897272318,1175458834178155,2231653213710451,993612035155649,420105186633067,2630669420480855,3527405530814778,1468104167136898,306754654914623,231743015323077,548949881001003,235384341281905,737887767495190,tijuanayalgomas,1705131363033115,762225935288067,7005052516225743,936199187190918,223422642593183,1201733367392698,bugaventas,570509089979856,3654187134857239,3668336143297308,1659536087704177,1074180987606282,221917823723934,891487698570794,705757149599322,799073043930379,885458013579302,584808788393451,488987258841602"; 
+
+    function vibrar(patron = 20) { if (navigator.vibrate) { try { navigator.vibrate(patron); } catch(e) {} } }
+
+    document.addEventListener('deviceready', () => {
+      if (window.StatusBar) { StatusBar.backgroundColorByHexString('#05070a'); StatusBar.styleLightContent(); }
+    }, false);
+
+    let rawStorage = localStorage.getItem('cyber_fb_list');
+    let grupos = [];
+    if (rawStorage) {
+      try { let p = JSON.parse(rawStorage); grupos = p.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); } catch(e) { grupos = []; }
+    }
+    if (!grupos.length) { grupos = BASE_IDS.split(',').map(id => ({ url: 'https://facebook.com/groups/' + id + '/', status: 'none' })); }
+
+    let urlActual = localStorage.getItem('cyber_fb_current_url') || '';
+    let idOperacion = null;
+
+    function limpiarID(url) { return (url || '').replace(/[\u200e\u200f\s]/g, '').replace(/^https?:\/\/(www\.|m\.)?facebook\.com\/groups\//i, '').split('/')[0].split('?')[0].toLowerCase(); }
+    function mostrarMensaje(texto, tipo) { const msg = document.getElementById('statusMsg'); msg.textContent = texto; msg.className = `msg msg-${tipo}`; msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 4000); }
+    function marcarActual(url) { vibrar(20); urlActual = url; localStorage.setItem('cyber_fb_current_url', url); render(); }
+    function irAlActual() {
+      vibrar(35); if (!urlActual) return mostrarMensaje('// ERROR: SIN GRUPO ACTUAL', 'error');
+      const el = document.querySelector('.is-current');
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); mostrarMensaje('🎯 ENFOCANDO', 'ok'); } else { mostrarMensaje('// NO ENCONTRADO EN LISTA', 'error'); }
+    }
+
+    function abrirEnFB(url) {
+      marcarActual(url); vibrar(30);
+      if (window.cordova && window.cordova.InAppBrowser) { cordova.InAppBrowser.open(url, '_system'); } 
+      else { const clean = url.replace(/^https?:\/\//i, ''); window.location.href = `intent://${clean}#Intent;scheme=https;package=com.facebook.lite;end`; }
+    }
+
+    function render() {
+      localStorage.setItem('cyber_fb_list', JSON.stringify(grupos));
+      const container = document.getElementById('cuentasContainer'); container.innerHTML = '';
+      const total = grupos.length; const totalCuentas = Math.ceil(total / 25) || 1;
+      document.getElementById('stats').textContent = `// TOTAL: ${total} GRUPOS // CUENTAS: ${totalCuentas}`;
+
+      let cuentaIndex = 1;
+      for (let i = 0; i < total; i += 25) {
+        const chunk = grupos.slice(i, i + 25);
+        const card = document.createElement('div'); card.className = 'cuenta-card';
+        card.innerHTML = `<div class="cuenta-header"><span class="cuenta-title">CUENTA ${cuentaIndex}</span><span class="badge ${chunk.length === 25 ? 'full' : ''}">${chunk.length}/25</span></div>`;
+        const ul = document.createElement('ul'); ul.className = 'link-list';
+
+        chunk.forEach((item, localIdx) => {
+          const globalIdx = i + localIdx;
+          const li = document.createElement('li');
+          const isCurr = item.url === urlActual;
+          const st = item.status === 'good' ? 'status-good' : (item.status === 'bad' ? 'status-bad' : '');
+          li.className = `link-item ${st} ${isCurr ? 'is-current' : ''}`;
+          li.innerHTML = `
+            <div class="link-main"><span class="link-num">${localIdx + 1}.</span><span class="link-anchor" onclick="abrirEnFB('${item.url}')">${item.url}</span>${isCurr ? '<span class="tag-current">► ACTUAL</span>' : ''}</div>
+            <div class="item-toolbar">
+              <button class="btn-pill ${isCurr ? 'active-now' : ''}" onclick="marcarActual('${item.url}')">►</button>
+              <button class="btn-pill ${item.status === 'good' ? 'active-good' : ''}" onclick="toggleCalificacion(${globalIdx}, 'good')">▲</button>
+              <button class="btn-pill ${item.status === 'bad' ? 'active-bad' : ''}" onclick="toggleCalificacion(${globalIdx}, 'bad')">▼</button>
+              <button class="btn-pill" onclick="abrirModalReemplazar(${globalIdx})">🔄</button>
+              <button class="btn-pill btn-del" onclick="abrirModalConfirmar(${globalIdx})">✕</button>
+            </div>
+          `;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul); container.appendChild(card); cuentaIndex++;
+      }
+    }
+
+    function toggleCalificacion(idx, estado) { vibrar(estado === 'good' ? [15, 30, 15] : 40); grupos[idx].status = grupos[idx].status === estado ? 'none' : estado; render(); }
+    function aleatorizarGrupos() {
+      vibrar([25, 40, 25, 40, 30]); if (grupos.length <= 1) return;
+      for (let i = grupos.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [grupos[i], grupos[j]] = [grupos[j], grupos[i]]; }
+      render(); mostrarMensaje('🔀 GRUPOS ALEATORIZADOS', 'ok');
+    }
+
+    function agregarGrupo() {
+      const input = document.getElementById('urlInput'); let raw = input.value.trim().replace(/[\u200e\u200f]/g, ''); if (!raw) return;
+      if (!raw.startsWith('http')) raw = 'https://facebook.com/groups/' + raw.replace(/^\/+/, '');
+      const idNuevo = limpiarID(raw);
+      if (!idNuevo) { vibrar([50, 40, 50]); return mostrarMensaje('// ERROR: Link no válido', 'error'); }
+      for (let i = 0; i < grupos.length; i++) { if (limpiarID(grupos[i].url) === idNuevo) { vibrar([60, 50, 60]); return mostrarMensaje(`⚠️ GRUPO REPETIDO`, 'error'); } }
+      vibrar(25); grupos.push({ url: raw, status: 'none' }); input.value = ''; mostrarMensaje('// AÑADIDO', 'ok'); render();
+    }
+
+    function abrirModalConfirmar(idx) { vibrar(30); idOperacion = idx; document.getElementById('modalConfirmar').style.display = 'flex'; }
+    function cerrarModalConfirmar() { document.getElementById('modalConfirmar').style.display = 'none'; idOperacion = null; }
+    function ejecutarEliminacion() { vibrar(50); if (idOperacion !== null) { if (grupos[idOperacion].url === urlActual) { urlActual = ''; localStorage.removeItem('cyber_fb_current_url'); } grupos.splice(idOperacion, 1); cerrarModalConfirmar(); render(); mostrarMensaje('// ELIMINADO', 'ok'); } }
+
+    function abrirModalReemplazar(idx) { vibrar(20); idOperacion = idx; document.getElementById('inputNuevoLink').value = grupos[idx].url; document.getElementById('modalReemplazar').style.display = 'flex'; }
+    function cerrarModalReemplazar() { document.getElementById('modalReemplazar').style.display = 'none'; idOperacion = null; }
+    function ejecutarReemplazo() {
+      const nuevo = document.getElementById('inputNuevoLink').value.trim().replace(/[\u200e\u200f]/g, ''); if (!nuevo || idOperacion === null) return;
+      let link = nuevo.startsWith('http') ? nuevo : 'https://facebook.com/groups/' + nuevo.replace(/^\/+/, '');
+      vibrar(25); if (grupos[idOperacion].url === urlActual) { urlActual = link; localStorage.setItem('cyber_fb_current_url', link); }
+      grupos[idOperacion] = { url: link, status: 'none' }; cerrarModalReemplazar(); render(); mostrarMensaje('// REEMPLAZADO', 'ok');
+    }
+
+    /* SISTEMA DE COMPARTIR NATIVO */
+    async function compartirJSON() {
+      vibrar(30); const jsonStr = JSON.stringify(grupos, null, 2);
+      if (window.plugins && window.plugins.socialsharing) {
+        const base64Data = "data:application/json;base64," + btoa(unescape(encodeURIComponent(jsonStr)));
+        window.plugins.socialsharing.share(null, 'cyber_grupos.json', base64Data, null);
+      } else { mostrarMensaje('// ERROR: PLUGIN NO DETECTADO', 'error'); }
+    }
+
+    /* SISTEMA DE ESCRITURA FÍSICA DIRECTA EN CARPETA DESCARGAS */
+    function exportarJSON() {
+      vibrar(25);
+      const jsonStr = JSON.stringify(grupos, null, 2);
+
+      if (window.cordova && cordova.plugins && cordova.plugins.permissions) {
+        var permissions = cordova.plugins.permissions;
+        permissions.checkPermission(permissions.WRITE_EXTERNAL_STORAGE, function(status) {
+          if (status.hasPermission) {
+            escribirEnMemoria(jsonStr);
+          } else {
+            mostrarMensaje('// SOLICITANDO PERMISO...', 'ok');
+            permissions.requestPermission(permissions.WRITE_EXTERNAL_STORAGE, function(statusReq) {
+              if (statusReq.hasPermission) { escribirEnMemoria(jsonStr); } else { mostrarMensaje('// PERMISO DENEGADO', 'error'); }
+            }, function() { mostrarMensaje('// ERROR DE PERMISOS', 'error'); });
+          }
+        });
+      } else {
+        const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr); a.download = "cyber_grupos.json"; document.body.appendChild(a); a.click(); a.remove();
+      }
+    }
+
+    function escribirEnMemoria(texto) {
+      mostrarMensaje('// CREANDO ARCHIVO...', 'ok');
+      window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory + 'Download/', function(dir) {
+        dir.getFile("cyber_grupos.json", {create: true, exclusive: false}, function(fileEntry) {
+          fileEntry.createWriter(function(fileWriter) {
+            fileWriter.onwriteend = function() { mostrarMensaje('// GUARDADO EN DESCARGAS', 'ok'); vibrar([30,50,30]); };
+            fileWriter.onerror = function() { mostrarMensaje('// ERROR AL ESCRIBIR', 'error'); };
+            fileWriter.write(new Blob([texto], {type: 'application/json'}));
+          }, function(){ mostrarMensaje('// ERROR EN WRITER', 'error'); });
+        }, function(){ mostrarMensaje('// ERROR AL CREAR ARCHIVO', 'error'); });
+      }, function(){ mostrarMensaje('// ERROR AL ABRIR DESCARGAS', 'error'); });
+    }
+
+    function importarJSON(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader(); r.onload = ev => {
+        try { const res = JSON.parse(ev.target.result); if (Array.isArray(res)) { vibrar([20, 30, 20]); grupos = res.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); render(); mostrarMensaje('// BASE DE DATOS CARGADA', 'ok'); } } catch(err) { mostrarMensaje('// ARCHIVO NO VÁLIDO', 'error'); }
+      }; r.readAsText(f);
+    }
+    
+    function abrirModalRespaldo() { vibrar(20); document.getElementById('textoRespaldo').value = JSON.stringify(grupos); document.getElementById('modalTexto').style.display = 'flex'; }
+    function cerrarModalRespaldo() { document.getElementById('modalTexto').style.display = 'none'; }
+    function restaurarDesdeTexto() {
+      try { const val = JSON.parse(document.getElementById('textoRespaldo').value.trim()); if (Array.isArray(val)) { vibrar([20, 30, 20]); grupos = val.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); render(); cerrarModalRespaldo(); mostrarMensaje('// RESTAURADO', 'ok'); } } catch(e) { alert('Error: Formato incorrecto.'); }
+    }
+
+    render();
+  </script>
+</body>
+</html>
