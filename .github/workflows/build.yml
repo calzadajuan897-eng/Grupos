@@ -1,4 +1,4 @@
-name: Compilar APK
+name: Compilar APK Grupos FB
 
 on:
   workflow_dispatch:
@@ -24,19 +24,51 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Instalar Cordova y Compilar APK
+      - name: Instalar Cordova, Plugins y Compilar APK
         run: |
           npm install -g cordova
-          cordova create app com.cyber.fbmanager CyberFB
+          cordova create app com.cyber.fbmanager "Grupos FB"
           cd app
           rm -rf www/*
           cp ../grupos.html www/grupos.html
+          
+          if [ -f ../icon.png ]; then
+            cp ../icon.png icon.png
+          fi
+
+          # Plugins nativos para barra de estado y apertura de enlaces
+          cordova plugin add cordova-plugin-statusbar
+          cordova plugin add cordova-plugin-inappbrowser
+
+          # Inyeccion de configuracion y permisos de Android
+          cat << 'EOF' > config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.cyber.fbmanager" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>Grupos FB</name>
+              <description>Cyber FB Manager Pro</description>
+              <author email="dev@cyberfb.local">CyberFB</author>
+              <content src="grupos.html" />
+              <access origin="*" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <allow-intent href="fb:*" />
+              <allow-intent href="intent:*" />
+              
+              <preference name="StatusBarBackgroundColor" value="#05070a" />
+              <preference name="StatusBarStyle" value="lightcontent" />
+              <preference name="BackgroundColor" value="#05070a" />
+              
+              <icon src="icon.png" />
+          </widget>
+          EOF
+
           cordova platform add android
           cordova build android --debug
+          mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/Grupos_FB.apk
 
       - name: Subir APK final
         uses: actions/upload-artifact@v4
         with:
-          name: CyberFB-Instalador
-          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          name: Grupos_FB-Instalador
+          path: app/platforms/android/app/build/outputs/apk/debug/Grupos_FB.apk
           
