@@ -27,28 +27,30 @@ jobs:
       - name: 🛠️ Instalar Cordova, Plugins y Compilar APK
         run: |
           npm install -g cordova
-          cordova create app com.cyber.fbmanager.public "Grupos FB"
+          
+          # CORRECCIÓN AQUÍ: Cambiamos "public" por "publico"
+          cordova create app com.cyber.fbmanager.publico "Grupos FB"
+          
           cd app
           rm -rf www/*
           
-          # ARCHIVO CORREGIDO: Copiamos tu html publico
           cp "../grupos_publico.html" www/index.html
           
           if [ -f ../icon.png ]; then
             cp ../icon.png icon.png
           fi
 
-          # Plugins nativos (Archivos, Permisos, Compartir, Interfaz)
+          # Plugins nativos
           cordova plugin add cordova-plugin-statusbar
           cordova plugin add cordova-plugin-inappbrowser
           cordova plugin add cordova-plugin-x-socialsharing
           cordova plugin add cordova-plugin-file
           cordova plugin add cordova-plugin-android-permissions
 
-          # Configuracion de Android (Aqui esta la cura para los permisos)
+          # CORRECCIÓN AQUÍ TAMBIÉN en el widget id
           cat << 'EOF' > config.xml
           <?xml version='1.0' encoding='utf-8'?>
-          <widget id="com.cyber.fbmanager.public" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+          <widget id="com.cyber.fbmanager.publico" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
               <name>Grupos FB</name>
               <description>Cyber FB Manager - Publico</description>
               <author email="dev@cyberfb.local">CyberFB</author>
@@ -71,7 +73,6 @@ jobs:
           cordova platform add android
           cordova build android --debug
           
-          # Nombre del APK cambiado a publico para que no te confundas
           mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/FB_Manager_Publico.apk
 
       - name: 📦 Subir APK final
