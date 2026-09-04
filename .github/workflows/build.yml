@@ -31,20 +31,18 @@ jobs:
           cd app
           rm -rf www/*
           
-          # Aqui le decimos que tome el archivo con el (1) y lo convierta en index.html
-          cp "../ grupos_publico.html" www/index.html
+          # ARCHIVO CORREGIDO: Sin el espacio antes de grupos_publico.html
+          cp "../grupos_publico.html" www/index.html
           
           if [ -f ../icon.png ]; then
             cp ../icon.png icon.png
           fi
-
           # Plugins nativos (Archivos, Permisos, Compartir, Interfaz)
           cordova plugin add cordova-plugin-statusbar
           cordova plugin add cordova-plugin-inappbrowser
           cordova plugin add cordova-plugin-x-socialsharing
           cordova plugin add cordova-plugin-file
           cordova plugin add cordova-plugin-android-permissions
-
           # Configuracion de Android
           cat << 'EOF' > config.xml
           <?xml version='1.0' encoding='utf-8'?>
@@ -67,14 +65,15 @@ jobs:
               <icon src="icon.png" />
           </widget>
           EOF
-
           cordova platform add android
           cordova build android --debug
-          mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/Grupos_FB.apk
-
+          
+          # Nombre del APK cambiado a publico para que no te confundas
+          mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/FB_Manager_Publico.apk
+          
       - name: Subir APK final
         uses: actions/upload-artifact@v4
         with:
-          name: Grupos_FB-Instalador
-          path: app/platforms/android/app/build/outputs/apk/debug/Grupos_FB.apk
+          name: FB_Manager_Publico
+          path: app/platforms/android/app/build/outputs/apk/debug/FB_Manager_Publico.apk
           
