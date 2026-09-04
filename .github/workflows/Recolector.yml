@@ -1,0 +1,84 @@
+name: 🕷️ Cazar Grupos Frescos
+
+# Esto crea el botón para ejecutarlo manualmente
+on:
+  workflow_dispatch:
+
+jobs:
+  buscar_grupos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Instalar Motor de Búsqueda
+        run: pip install duckduckgo-search
+
+      - name: 🤖 Ejecutar Script de Extracción
+        run: |
+          cat << 'EOF' > bot.py
+          import json
+          import time
+          from duckduckgo_search import DDGS
+
+          # Búsquedas avanzadas: Jerga + Ciudades + Palabras clave de tamaño
+          busquedas = [
+              'site:facebook.com/groups "Presto Varo" "mil miembros"',
+              'site:facebook.com/groups "Presto Feria" "Monterrey"',
+              'site:facebook.com/groups "Tê Sirven 3000 Varøs" "K miembros"',
+              'site:facebook.com/groups "ocupas varo" "Edomex"',
+              'site:facebook.com/groups "préstamos" "sin anticipo" "Tijuana"',
+              'site:facebook.com/groups "Presto Feria" "Guadalajara"'
+          ]
+
+          enlaces_crudos = set()
+          ddgs = DDGS()
+
+          print("// INICIANDO RASTREO CON FILTRO DE TIEMPO (Último mes)...")
+          
+          for frase in busquedas:
+              try:
+                  print(f"Apuntando a: {frase}")
+                  # timelimit='m' obliga a buscar solo resultados indexados en el último mes
+                  resultados = ddgs.text(frase, max_results=40, timelimit='m')
+                  for r in resultados:
+                      url = r.get('href', '')
+                      if 'facebook.com/groups/' in url:
+                          enlaces_crudos.add(url)
+                  time.sleep(3) # Pausa obligatoria para que el buscador no nos bloquee
+              except Exception as e:
+                  print(f"Aviso en {frase}: No trajo resultados o hubo pausa. ({e})")
+
+          grupos_limpios = []
+          ids_guardados = set()
+
+          for link in enlaces_crudos:
+              try:
+                  # Limpiamos toda la basura de la URL para dejar solo el ID
+                  parte_id = link.split('groups/')[1].split('/')[0].split('?')[0]
+                  if parte_id and parte_id not in ids_guardados:
+                      ids_guardados.add(parte_id)
+                      grupos_limpios.append({
+                          "url": f"https://facebook.com/groups/{parte_id}/",
+                          "status": "none"
+                      })
+              except:
+                  continue
+
+          # Guardamos el JSON listo para tu App
+          with open('grupos_frescos.json', 'w') as f:
+              json.dump(grupos_limpios, f, indent=2)
+
+          print(f"// ¡CACERÍA TERMINADA! Se empaquetaron {len(grupos_limpios)} grupos frescos.")
+          EOF
+          python bot.py
+
+      - name: 📥 Entregar Archivo JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: Archivo_Grupos_Frescos
+          path: grupos_frescos.json
+          
