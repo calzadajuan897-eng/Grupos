@@ -1,20 +1,22 @@
-name: 📱 Compilar App Cordova (Pro)
+name: 📱 Compilar APK Grupos Publico
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Descargar código HTML
+      - name: 📥 Descargar codigo
         uses: actions/checkout@v4
 
       - name: ⚙️ Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: ☕ Configurar Java 17
         uses: actions/setup-java@v5
@@ -22,25 +24,58 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: 🛠️ Instalar Cordova y Plugins
+      - name: 🛠️ Instalar Cordova, Plugins y Compilar APK
         run: |
           npm install -g cordova
-          cordova create app com.cyber.fbmanager "FB Manager"
-          cp index.html app/www/index.html
+          cordova create app com.cyber.fbmanager.public "Grupos FB"
           cd app
-          cordova platform add android
+          rm -rf www/*
+          
+          # ARCHIVO CORREGIDO: Copiamos tu html publico
+          cp "../grupos_publico.html" www/index.html
+          
+          if [ -f ../icon.png ]; then
+            cp ../icon.png icon.png
+          fi
+
+          # Plugins nativos (Archivos, Permisos, Compartir, Interfaz)
           cordova plugin add cordova-plugin-statusbar
+          cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-x-socialsharing
           cordova plugin add cordova-plugin-file
           cordova plugin add cordova-plugin-android-permissions
-          cordova plugin add cordova-plugin-x-socialsharing
 
-      - name: 🏗️ Compilar APK
-        run: |
-          cd app
-          cordova build android --release
+          # Configuracion de Android (Aqui esta la cura para los permisos)
+          cat << 'EOF' > config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.cyber.fbmanager.public" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>Grupos FB</name>
+              <description>Cyber FB Manager - Publico</description>
+              <author email="dev@cyberfb.local">CyberFB</author>
+              <content src="index.html" />
+              <access origin="*" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <allow-intent href="fb:*" />
+              <allow-intent href="intent:*" />
+              
+              <preference name="StatusBarBackgroundColor" value="#121212" />
+              <preference name="StatusBarStyle" value="lightcontent" />
+              <preference name="BackgroundColor" value="#121212" />
+              <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+              
+              <icon src="icon.png" />
+          </widget>
+          EOF
 
-      - name: 📦 Subir APK Final
+          cordova platform add android
+          cordova build android --debug
+          
+          # Nombre del APK cambiado a publico para que no te confundas
+          mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/FB_Manager_Publico.apk
+
+      - name: 📦 Subir APK final
         uses: actions/upload-artifact@v4
         with:
-          name: App_FB_Manager_Final
-          path: app/platforms/android/**/*.apk
+          name: FB_Manager_Publico
+          path: "**/*.apk"
