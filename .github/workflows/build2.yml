@@ -9,35 +9,26 @@ jobs:
 
     steps:
       - name: 📥 Descargar código HTML
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # <-- Actualizado a v4
 
       - name: ⚙️ Configurar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4 # <-- Actualizado a v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: ☕ Configurar Java 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5 # <-- Actualizado a v5
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: 🛠️ Instalar Cordova y Plugins
         run: |
-          # 1. Instalar el motor de Cordova
           npm install -g cordova
-          
-          # 2. Crear el cascarón de la app
           cordova create app com.cyber.fbmanager "FB Manager"
-          
-          # 3. Mover tu index.html dentro de la app
           cp index.html app/www/index.html
-          
-          # 4. Entrar a la carpeta e instalar Android y herramientas
           cd app
           cordova platform add android
-          
-          # 5. INYECTAR LOS 4 PLUGINS MAESTROS
           cordova plugin add cordova-plugin-statusbar
           cordova plugin add cordova-plugin-file
           cordova plugin add cordova-plugin-android-permissions
@@ -52,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: App_FB_Manager_Final
-          path: app/platforms/android/app/build/outputs/apk/release/*.apk
+          path: app/platforms/android/**/*.apk
