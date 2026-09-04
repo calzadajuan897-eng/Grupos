@@ -11,9 +11,9 @@
       --bg: #121212; 
       --surface: #1E1E1E; 
       --surface-variant: #2D2D2D;
-      --primary: #8AB4F8; /* Azul Google */
-      --secondary: #81C995; /* Verde Pastel */
-      --error: #F28B82; /* Rojo Pastel */
+      --primary: #8AB4F8; 
+      --secondary: #81C995; 
+      --error: #F28B82; 
       --text: #E8EAED; 
       --text-muted: #9AA0A6; 
       --border: #3C4043; 
@@ -26,7 +26,6 @@
       background-color: var(--bg); 
       color: var(--text); 
       margin: 0; 
-      /* AÑADIMOS PADDING SUPERIOR EXTRA PARA EMPUJARLO BAJO LA BARRA DE ESTADO */
       padding: 38px 14px 80px 14px; 
     }
 
@@ -41,7 +40,6 @@
     
     .stats { text-align: center; color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.5px; margin-bottom: 16px; }
     
-    /* Tarjetas Material */
     .panel, .cuenta-card { 
       background: var(--surface); 
       border-radius: 16px; 
@@ -70,7 +68,6 @@
       box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.2);
     }
     
-    /* Botones Material */
     button { 
       border: none; 
       border-radius: 20px; 
@@ -94,7 +91,6 @@
     .msg-error { background: rgba(242,139,130,0.15); color: var(--error); }
     .msg-ok { background: rgba(129,201,149,0.15); color: var(--secondary); }
     
-    /* Cabecera de cuenta */
     .cuenta-header { 
       background: var(--surface); 
       padding: 12px 16px; 
@@ -108,7 +104,6 @@
     .badge { background: var(--bg); color: var(--text-muted); padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid var(--border); }
     .badge.full { background: rgba(129,201,149,0.15); color: var(--secondary); border-color: rgba(129,201,149,0.3); }
     
-    /* Lista de links */
     .link-list { list-style: none; margin: 0; padding: 0; }
     .link-item { padding: 12px 16px; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); gap: 8px; transition: background 0.2s ease; }
     .link-item:last-child { border-bottom: none; }
@@ -117,7 +112,6 @@
     .link-item.status-bad { border-left: 4px solid var(--error); }
     .link-item.status-bad .link-anchor { text-decoration: line-through; opacity: 0.5; }
     
-    /* Grupo Actual - Material Selection */
     .link-item.is-current { 
       background: rgba(138, 180, 248, 0.08) !important; 
       border: 1px solid var(--primary) !important; 
@@ -130,7 +124,6 @@
     .link-num { color: var(--text-muted); font-size: 0.75rem; min-width: 22px; font-weight: 500; }
     .link-anchor { color: var(--primary); text-decoration: none; word-break: break-all; font-size: 0.85rem; flex: 1; cursor: pointer; }
     
-    /* Botones de acción de lista */
     .item-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-left: 30px; }
     .btn-pill { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 16px; font-size: 0.7rem; box-shadow: none; font-weight: 400; text-transform: none; }
     .btn-pill.active-good { background: rgba(129,201,149,0.15); border-color: transparent; color: var(--secondary); font-weight: 500; }
@@ -138,7 +131,6 @@
     .btn-pill.active-now { background: var(--primary); color: #000; border-color: transparent; font-weight: 500; }
     .btn-del { color: var(--text-muted); }
     
-    /* Modales */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); padding: 20px; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: var(--surface); border-radius: 24px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
     .modal-box h3 { margin: 0 0 8px; font-size: 1.1rem; font-weight: 500; }
@@ -164,7 +156,7 @@
       <button class="btn-action" onclick="exportarJSON()">Guardar</button>
       <button class="btn-action" onclick="document.getElementById('fileInput').click()">Cargar</button>
       <button class="btn-action" onclick="abrirModalRespaldo()">Texto</button>
-      <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importarJSON(event)">
+      <input type="file" id="fileInput" style="display:none" accept="application/json, text/plain, */*" onchange="importarJSON(event)">
     </div>
   </div>
 
@@ -208,7 +200,6 @@
   <script src="cordova.js"></script>
 
   <script>
-    // AQUI SE BORRARON TODOS TUS IDs. AHORA EMPIEZA VACIO.
     const BASE_IDS = ""; 
 
     function vibrar(patron = 20) { if (navigator.vibrate) { try { navigator.vibrate(patron); } catch(e) {} } }
@@ -221,22 +212,21 @@
       }
     }, false);
 
-    let rawStorage = localStorage.getItem('cyber_fb_list');
+    let rawStorage = localStorage.getItem('cyber_fb_list_public');
     let grupos = [];
     if (rawStorage) {
       try { let p = JSON.parse(rawStorage); grupos = p.map(i => typeof i === 'string' ? { url: i, status: 'none' } : i); } catch(e) { grupos = []; }
     }
-    // Lógica ajustada para que si BASE_IDS está vacío, no intente crear grupos fantasma
     if (!grupos.length && BASE_IDS.trim() !== "") { 
         grupos = BASE_IDS.split(',').map(id => ({ url: 'https://facebook.com/groups/' + id + '/', status: 'none' })); 
     }
 
-    let urlActual = localStorage.getItem('cyber_fb_current_url') || '';
+    let urlActual = localStorage.getItem('cyber_fb_current_url_public') || '';
     let idOperacion = null;
 
     function limpiarID(url) { return (url || '').replace(/[\u200e\u200f\s]/g, '').replace(/^https?:\/\/(www\.|m\.)?facebook\.com\/groups\//i, '').split('/')[0].split('?')[0].toLowerCase(); }
     function mostrarMensaje(texto, tipo) { const msg = document.getElementById('statusMsg'); msg.textContent = texto; msg.className = `msg msg-${tipo}`; msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 4000); }
-    function marcarActual(url) { vibrar(20); urlActual = url; localStorage.setItem('cyber_fb_current_url', url); render(); }
+    function marcarActual(url) { vibrar(20); urlActual = url; localStorage.setItem('cyber_fb_current_url_public', url); render(); }
     function irAlActual() {
       vibrar(35); if (!urlActual) return mostrarMensaje('Sin grupo actual', 'error');
       const el = document.querySelector('.is-current');
@@ -244,13 +234,16 @@
     }
 
     function abrirEnFB(url) {
+      // ESCUDO ANTI-CRASH: Evita enlaces dañados o "undefined"
+      if (!url || url === 'undefined') return mostrarMensaje('Enlace dañado', 'error');
+      
       marcarActual(url); vibrar(30);
       if (window.cordova && window.cordova.InAppBrowser) { cordova.InAppBrowser.open(url, '_system'); } 
       else { const clean = url.replace(/^https?:\/\//i, ''); window.location.href = `intent://${clean}#Intent;scheme=https;package=com.facebook.lite;end`; }
     }
 
     function render() {
-      localStorage.setItem('cyber_fb_list', JSON.stringify(grupos));
+      localStorage.setItem('cyber_fb_list_public', JSON.stringify(grupos));
       const container = document.getElementById('cuentasContainer'); container.innerHTML = '';
       const total = grupos.length; const totalCuentas = Math.ceil(total / 25) || 1;
       document.getElementById('stats').textContent = `Total: ${total} grupos • Cuentas: ${totalCuentas}`;
@@ -302,14 +295,14 @@
 
     function abrirModalConfirmar(idx) { vibrar(30); idOperacion = idx; document.getElementById('modalConfirmar').style.display = 'flex'; }
     function cerrarModalConfirmar() { document.getElementById('modalConfirmar').style.display = 'none'; idOperacion = null; }
-    function ejecutarEliminacion() { vibrar(50); if (idOperacion !== null) { if (grupos[idOperacion].url === urlActual) { urlActual = ''; localStorage.removeItem('cyber_fb_current_url'); } grupos.splice(idOperacion, 1); cerrarModalConfirmar(); render(); mostrarMensaje('Eliminado', 'ok'); } }
+    function ejecutarEliminacion() { vibrar(50); if (idOperacion !== null) { if (grupos[idOperacion].url === urlActual) { urlActual = ''; localStorage.removeItem('cyber_fb_current_url_public'); } grupos.splice(idOperacion, 1); cerrarModalConfirmar(); render(); mostrarMensaje('Eliminado', 'ok'); } }
 
     function abrirModalReemplazar(idx) { vibrar(20); idOperacion = idx; document.getElementById('inputNuevoLink').value = grupos[idx].url; document.getElementById('modalReemplazar').style.display = 'flex'; }
     function cerrarModalReemplazar() { document.getElementById('modalReemplazar').style.display = 'none'; idOperacion = null; }
     function ejecutarReemplazo() {
       const nuevo = document.getElementById('inputNuevoLink').value.trim().replace(/[\u200e\u200f]/g, ''); if (!nuevo || idOperacion === null) return;
       let link = nuevo.startsWith('http') ? nuevo : 'https://facebook.com/groups/' + nuevo.replace(/^\/+/, '');
-      vibrar(25); if (grupos[idOperacion].url === urlActual) { urlActual = link; localStorage.setItem('cyber_fb_current_url', link); }
+      vibrar(25); if (grupos[idOperacion].url === urlActual) { urlActual = link; localStorage.setItem('cyber_fb_current_url_public', link); }
       grupos[idOperacion] = { url: link, status: 'none' }; cerrarModalReemplazar(); render(); mostrarMensaje('Reemplazado', 'ok');
     }
 
