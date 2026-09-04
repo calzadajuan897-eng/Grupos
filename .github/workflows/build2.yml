@@ -1,0 +1,55 @@
+name: 📱 Compilar App Cordova (Pro)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Descargar código HTML
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: ☕ Configurar Java 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🛠️ Instalar Cordova y Plugins
+        run: |
+          # 1. Instalar el motor de Cordova
+          npm install -g cordova
+          
+          # 2. Crear el cascarón de la app
+          cordova create app com.cyber.fbmanager "FB Manager"
+          
+          # 3. Mover tu index.html dentro de la app
+          cp index.html app/www/index.html
+          
+          # 4. Entrar a la carpeta e instalar Android y herramientas
+          cd app
+          cordova platform add android
+          
+          # 5. INYECTAR LOS 4 PLUGINS MAESTROS
+          cordova plugin add cordova-plugin-statusbar
+          cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-android-permissions
+          cordova plugin add cordova-plugin-x-socialsharing
+
+      - name: 🏗️ Compilar APK
+        run: |
+          cd app
+          cordova build android --release
+
+      - name: 📦 Subir APK Final
+        uses: actions/upload-artifact@v4
+        with:
+          name: App_FB_Manager_Final
+          path: app/platforms/android/app/build/outputs/apk/release/*.apk
