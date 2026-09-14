@@ -1,0 +1,84 @@
+name: 📱 Compilar APK Grupos Act
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: ☕ Configurar Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🛠️ Instalar Cordova, Plugins y Compilar APK
+        run: |
+          npm install -g cordova
+          
+          # Le damos un identificador único a esta versión
+          cordova create app com.cyber.fbmanager.act "Grupos FB Act"
+          
+          cd app
+          rm -rf www/*
+          
+          # AQUÍ ESTÁ LA MAGIA: Tomamos tu nuevo archivo html
+          cp "../grupos_act.html" www/index.html
+          
+          if [ -f ../icon.png ]; then
+            cp ../icon.png icon.png
+          fi
+
+          # Plugins nativos (Archivos, Permisos, Compartir, Interfaz)
+          cordova plugin add cordova-plugin-statusbar
+          cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-x-socialsharing
+          cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-android-permissions
+
+          # Configuracion de Android
+          cat << 'EOF' > config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.cyber.fbmanager.act" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>Grupos FB Act</name>
+              <description>Cyber FB Manager - Actualizado</description>
+              <author email="dev@cyberfb.local">CyberFB</author>
+              <content src="index.html" />
+              <access origin="*" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <allow-intent href="fb:*" />
+              <allow-intent href="intent:*" />
+              
+              <preference name="StatusBarBackgroundColor" value="#121212" />
+              <preference name="StatusBarStyle" value="lightcontent" />
+              <preference name="BackgroundColor" value="#121212" />
+              <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+              
+              <icon src="icon.png" />
+          </widget>
+          EOF
+
+          cordova platform add android
+          cordova build android --debug
+          
+          # Renombramos el archivo final para ubicarlo fácil
+          mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/FB_Manager_Act.apk
+
+      - name: 📦 Subir APK final
+        uses: actions/upload-artifact@v4
+        with:
+          name: FB_Manager_Act
+          path: "**/*.apk"
