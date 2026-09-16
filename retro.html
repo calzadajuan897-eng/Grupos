@@ -11,10 +11,10 @@
       --bg: #000000; 
       --surface: #111111; 
       --surface-variant: #222222;
-      --primary: #5A99FF; /* Azul clásico */
-      --secondary: #4CAF50; /* Verde 8-bits */
-      --warning: #FFEB3B; /* Amarillo retro */
-      --error: #FF5252; /* Rojo arcade */
+      --primary: #5A99FF; 
+      --secondary: #4CAF50; 
+      --warning: #FFEB3B; 
+      --error: #FF5252; 
       --text: #EEEEEE; 
       --text-muted: #888888; 
       --border: #444444; 
@@ -23,13 +23,12 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body { 
-      /* Fuente retro tipo máquina de escribir o terminal */
       font-family: 'Courier New', Courier, monospace; 
       background-color: var(--bg); 
       color: var(--text); 
       margin: 0; 
       padding: 38px 14px 80px 14px; 
-      text-transform: uppercase; /* Todo en mayúsculas da más vibra retro */
+      text-transform: uppercase; 
     }
 
     .brand { 
@@ -41,16 +40,29 @@
       text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.2);
     }
     
-    .stats { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px; font-weight: bold; }
+    .stats { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px; font-weight: bold; }
     
-    /* Tarjetas estilo ventana de RPG clásico */
+    /* El Radar de Misión (Estilo 8-Bits) */
+    .tracker-box {
+      background: #001100;
+      border: 2px dashed var(--secondary);
+      color: var(--text);
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 16px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      box-shadow: 4px 4px 0px rgba(76, 175, 80, 0.2);
+    }
+    
     .panel, .cuenta-card { 
       background: var(--surface); 
-      border: 3px solid var(--border); /* Bordes gruesos y rectos */
+      border: 3px solid var(--border); 
       border-radius: 0; 
       padding: 12px; 
       margin-bottom: 16px; 
-      box-shadow: 4px 4px 0px rgba(255,255,255,0.1); /* Sombra de bloque */
+      box-shadow: 4px 4px 0px rgba(255,255,255,0.1); 
     }
     
     .cuenta-card { padding: 0; overflow: hidden; }
@@ -67,11 +79,8 @@
       font-family: 'Courier New', Courier, monospace;
       outline: none;
     }
-    input[type="text"]:focus { 
-      border-color: var(--primary); 
-    }
+    input[type="text"]:focus { border-color: var(--primary); }
     
-    /* Botones estilo Arcade */
     button { 
       border: 2px solid var(--border); 
       border-radius: 0; 
@@ -117,11 +126,7 @@
     .link-item.status-bad { border-left: 6px solid var(--error); opacity: 0.7; }
     .link-item.status-bad .link-anchor { text-decoration: line-through; }
     
-    .link-item.is-current { 
-      background: #001133 !important; 
-      border: 2px solid var(--primary) !important; 
-      margin: 4px; 
-    }
+    .link-item.is-current { background: #001133 !important; border: 2px solid var(--primary) !important; margin: 4px; }
     
     .tag-current { background: var(--primary); color: #000; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; margin-left: 8px; border: 1px solid #000; }
     .link-main { display: flex; align-items: center; gap: 8px; }
@@ -134,7 +139,6 @@
     .btn-pill.active-good { background: #003300; border-color: var(--secondary); color: var(--secondary); }
     .btn-pill.active-regular { background: #333300; border-color: var(--warning); color: var(--warning); }
     .btn-pill.active-bad { background: #330000; border-color: var(--error); color: var(--error); }
-    
     .btn-pill.active-now { background: var(--primary); color: #000; border-color: var(--primary); }
     .btn-del { color: var(--error); border-color: transparent; }
     
@@ -149,6 +153,9 @@
 
   <div class="brand">Cyber FB Manager Pro</div>
   <div class="stats" id="stats">Cargando...</div>
+  
+  <!-- NUEVO: RADAR DE MISIÓN FLOTANTE -->
+  <div id="trackerBox" class="tracker-box"></div>
 
   <div class="panel">
     <div class="input-row">
@@ -228,6 +235,7 @@
 
     let urlActual = localStorage.getItem('cyber_fb_current_url') || '';
     let idOperacion = null;
+    let agregadosSesion = 0; // NUEVO: Contador de grupos de esta sesión
 
     function limpiarID(url) { return (url || '').replace(/[\u200e\u200f\s]/g, '').replace(/^https?:\/\/(www\.|m\.)?facebook\.com\/groups\//i, '').split('/')[0].split('?')[0].toLowerCase(); }
     
@@ -254,11 +262,52 @@
       else { const clean = url.replace(/^https?:\/\//i, ''); window.location.href = `intent://${clean}#Intent;scheme=https;package=com.facebook.lite;end`; }
     }
     
+    // NUEVO: Función inteligente del Tracker
+    function actualizarTracker() {
+      const tracker = document.getElementById('trackerBox');
+      
+      // Si ya completaste los 25
+      if (agregadosSesion === 25) {
+        tracker.style.display = 'block';
+        tracker.style.borderColor = 'var(--secondary)';
+        tracker.innerHTML = '<span style="color: var(--secondary); font-size: 1.1rem;">¡MISIÓN CUMPLIDA! 👾</span>';
+        setTimeout(() => { 
+          tracker.style.display = 'none'; 
+          agregadosSesion = 26; // Para que no vuelva a salir hasta reiniciar app
+        }, 3000);
+        return;
+      }
+      
+      // Si te pasaste de 25, se queda oculto para no estorbar
+      if (agregadosSesion > 25) {
+        tracker.style.display = 'none';
+        return;
+      }
+
+      tracker.style.display = 'block';
+      let faltan = 25 - (grupos.length % 25);
+      if (faltan === 25 && grupos.length > 0) faltan = 0;
+
+      let html = `Misión: <span style="color: var(--primary);">${agregadosSesion}</span>/25 AÑADIDOS HOY`;
+      
+      if (faltan > 0) {
+        html += `<br><span style="font-size:0.7rem; color: var(--warning);">FALTAN ${faltan} GRUPOS PARA CERRAR LA CUENTA ACTUAL</span>`;
+      } else if (grupos.length > 0) {
+        html += `<br><span style="font-size:0.7rem; color: var(--secondary);">LAS CUENTAS ESTÁN LLENAS (MÚLTIPLO DE 25)</span>`;
+      } else {
+        html += `<br><span style="font-size:0.7rem; color: var(--text-muted);">AÚN NO HAY GRUPOS EN LA LISTA</span>`;
+      }
+      
+      tracker.innerHTML = html;
+    }
+
     function render() {
       localStorage.setItem('cyber_fb_list', JSON.stringify(grupos));
       const container = document.getElementById('cuentasContainer'); container.innerHTML = '';
       const total = grupos.length; const totalCuentas = Math.ceil(total / 25) || 1;
       document.getElementById('stats').textContent = `TOTAL: ${total} GRUPOS • CUENTAS: ${totalCuentas}`;
+
+      actualizarTracker(); // Mantiene el radar actualizado en cada renderizado
 
       let cuentaIndex = 1;
       for (let i = 0; i < total; i += 25) {
@@ -271,7 +320,6 @@
           const globalIdx = i + localIdx;
           const li = document.createElement('li');
           const isCurr = item.url === urlActual;
-          
           const st = item.status === 'good' ? 'status-good' : (item.status === 'bad' ? 'status-bad' : (item.status === 'regular' ? 'status-regular' : ''));
           
           li.className = `link-item ${st} ${isCurr ? 'is-current' : ''}`;
@@ -304,7 +352,6 @@
       render(); mostrarMensaje('Grupos aleatorizados', 'ok');
     }
 
-    // LÓGICA DE AUTO-RECICLAJE
     function agregarGrupo() {
       const input = document.getElementById('urlInput'); 
       let raw = input.value.trim().replace(/[\u200e\u200f]/g, ''); 
@@ -334,6 +381,11 @@
         mostrarMensaje('Añadido', 'ok');
       }
       
+      // NUEVO: Sumar al contador de la misión cada vez que añades exitosamente
+      if (agregadosSesion < 25) {
+        agregadosSesion++;
+      }
+      
       input.value = ''; 
       render();
     }
@@ -351,7 +403,6 @@
       grupos[idOperacion] = { url: link, status: 'none' }; cerrarModalReemplazar(); render(); mostrarMensaje('Reemplazado', 'ok');
     }
 
-    /* SISTEMA DE COMPARTIR NATIVO */
     async function compartirJSON() {
       vibrar(30); const jsonStr = JSON.stringify(grupos, null, 2);
       if (window.plugins && window.plugins.socialsharing) {
@@ -360,7 +411,6 @@
       } else { mostrarMensaje('Plugin no detectado', 'error'); }
     }
 
-    /* SISTEMA DE ESCRITURA FÍSICA DIRECTA EN CARPETA DESCARGAS */
     function exportarJSON() {
       vibrar(25);
       const jsonStr = JSON.stringify(grupos, null, 2);
