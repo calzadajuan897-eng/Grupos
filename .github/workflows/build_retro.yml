@@ -1,0 +1,82 @@
+name: 👾 Compilar FB Retro
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: ☕ Configurar Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🛠️ Instalar Cordova, Plugins y Compilar APK
+        run: |
+          npm install -g cordova
+          
+          # ID único para la versión Retro
+          cordova create app com.cyber.fbmanager.retro "FB Retro"
+          
+          cd app
+          rm -rf www/*
+          
+          # Tomamos el nuevo archivo retro.html
+          cp "../retro.html" www/index.html
+          
+          if [ -f ../icon.png ]; then
+            cp ../icon.png icon.png
+          fi
+
+          cordova plugin add cordova-plugin-statusbar
+          cordova plugin add cordova-plugin-inappbrowser
+          cordova plugin add cordova-plugin-x-socialsharing
+          cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-android-permissions
+
+          cat << 'EOF' > config.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <widget id="com.cyber.fbmanager.retro" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+              <name>FB Retro</name>
+              <description>Cyber FB Manager - 8 Bits</description>
+              <author email="dev@cyberfb.local">CyberFB</author>
+              <content src="index.html" />
+              <access origin="*" />
+              <allow-intent href="http://*/*" />
+              <allow-intent href="https://*/*" />
+              <allow-intent href="fb:*" />
+              <allow-intent href="intent:*" />
+              
+              <preference name="StatusBarBackgroundColor" value="#000000" />
+              <preference name="StatusBarStyle" value="lightcontent" />
+              <preference name="BackgroundColor" value="#000000" />
+              <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+              
+              <icon src="icon.png" />
+          </widget>
+          EOF
+
+          cordova platform add android
+          cordova build android --debug
+          
+          # Nombre claro para el APK final
+          mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/FB_Manager_Retro.apk
+
+      - name: 📦 Subir APK final
+        uses: actions/upload-artifact@v4
+        with:
+          name: FB_Manager_Retro
+          path: "**/*.apk"
